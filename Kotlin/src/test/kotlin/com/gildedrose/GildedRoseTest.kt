@@ -117,6 +117,27 @@ internal class GildedRoseTest {
         assertEquals(expectedQuality, items[0].quality)
     }
 
+    @ParameterizedTest
+    @CsvSource(
+            "'Sulfuras, Hand of Ragnaros', 10, 80, 4, 10",
+            "Aged Brie, 2, 10, 1, 1",
+            "Backstage passes to a TAFKAL80ETC concert, 5, 10, 7, -2",
+    )
+    fun testSellIn(
+            name: String,
+            sellIn: Int,
+            quality: Int,
+            days: Int,
+            expectedSellIn: Int
+    ) {
+        val items = listOf(Item(name, sellIn, quality))
+        val gildedRose = GildedRose(items)
+        for (i in 1..days) {
+            gildedRose.updateQuality()
+        }
+        assertEquals(expectedSellIn, items[0].sellIn)
+    }
+
 }
 
 

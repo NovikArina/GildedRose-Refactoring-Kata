@@ -12,8 +12,7 @@ class GildedRose(var items: List<Item>) {
     // Aged Brie increases in Quality the older it gets
     private fun updateAgedBrieItem(item: Item) {
         item.sellIn--
-        item.quality++
-        validateQuality(item)
+        item.increaseQuality()
     }
 
     // Backstage passes increases in Quality as its SellIn value approaches
@@ -27,55 +26,61 @@ class GildedRose(var items: List<Item>) {
         }
         item.quality++
         if (item.sellIn <= 10) {
-            item.quality++
+            item.increaseQuality()
         }
         if (item.sellIn <= 5) {
-            item.quality++
+            item.increaseQuality()
         }
-        validateQuality(item)
     }
 
     //Conjured items degrade in Quality twice as fast as normal
     private fun updateConjuredItem(item: Item) {
 
         item.sellIn--
-        item.quality -= 2
+        item.decreaseQuality(2)
         if (item.sellIn < 0) {
-            item.quality -= 2
+            item.decreaseQuality(2)
         }
-        validateQuality(item)
     }
 
     // Quality degrades twice as fast after sellIn date
     private fun updateNormalItem(item: Item) {
 
         item.sellIn--
-        item.quality--
+        item.decreaseQuality()
         if (item.sellIn < 0) {
-            item.quality--
-        }
-        validateQuality(item)
-    }
-
-    //The Quality of an item is never negative ane more than 50
-    private fun validateQuality(item: Item) {
-        if (item.quality < 0) {
-            item.quality = 0
-        }
-        if (item.quality > 50) {
-            item.quality = 50
+            item.decreaseQuality()
         }
     }
 
     fun updateQuality() {
         for (item in items) {
-            when (item.name) {
-                AGED_BRIE -> updateAgedBrieItem(item)
-                BACKSTAGE_PASSES -> updateBackstagePassesItem(item)
-                SULFURAS -> {} // We don't need to change legendary Sulfuras items
-                CONJURED -> updateConjuredItem(item)
+            when {
+                item.name.startsWith(AGED_BRIE) -> updateAgedBrieItem(item)
+                item.name.startsWith(BACKSTAGE_PASSES) -> updateBackstagePassesItem(item)
+                item.name.startsWith(SULFURAS) -> {} // We don't need to change legendary Sulfuras items
+                item.name.startsWith(CONJURED) -> updateConjuredItem(item)
                 else -> updateNormalItem(item)
             }
+        }
+    }
+
+    //The Quality of an item is never negative ane more than 50
+    private fun Item.isQualityValid(): Boolean {
+        return this.quality in 0..50
+    }
+
+    private fun Item.increaseQuality(amount: Int = 1) {
+        this.quality += amount
+        if (!this.isQualityValid()) {
+            this.quality = 50
+        }
+    }
+
+    private fun Item.decreaseQuality(amount: Int = 1) {
+        this.quality -= amount
+        if (!this.isQualityValid()) {
+            this.quality = 0
         }
     }
 }
