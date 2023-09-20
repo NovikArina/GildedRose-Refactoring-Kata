@@ -7,6 +7,9 @@ class GildedRose(var items: List<Item>) {
         const val BACKSTAGE_PASSES = "Backstage passes to a TAFKAL80ETC concert"
         const val SULFURAS = "Sulfuras, Hand of Ragnaros"
         const val CONJURED = "Conjured Mana Cake"
+
+        const val MIN_QUALITY = 0
+        const val MAX_QUALITY = 50
     }
 
     // Aged Brie increases in Quality the older it gets
@@ -21,7 +24,7 @@ class GildedRose(var items: List<Item>) {
     private fun updateBackstagePassesItem(item: Item) {
         item.sellIn--
         if (item.sellIn < 0) {
-            item.quality = 0
+            item.quality = MIN_QUALITY
             return
         }
         item.quality++
@@ -65,23 +68,14 @@ class GildedRose(var items: List<Item>) {
         }
     }
 
-    //The Quality of an item is never negative ane more than 50
-    private fun Item.isQualityValid(): Boolean {
-        return this.quality in 0..50
-    }
-
     private fun Item.increaseQuality(amount: Int = 1) {
-        this.quality += amount
-        if (!this.isQualityValid()) {
-            this.quality = 50
-        }
+        val newQuality = quality + amount
+        this.quality = newQuality.takeIf { it <= MAX_QUALITY } ?: MAX_QUALITY
     }
 
     private fun Item.decreaseQuality(amount: Int = 1) {
-        this.quality -= amount
-        if (!this.isQualityValid()) {
-            this.quality = 0
-        }
+        val newQuality = quality - amount
+        this.quality = newQuality.takeIf { it >= MIN_QUALITY } ?: MIN_QUALITY
     }
 }
 
